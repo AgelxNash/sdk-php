@@ -17,10 +17,10 @@ abstract class AbstractService implements ServiceInterface
     protected static $apiObjectClass = null;
 
     /**
-     * @var string Formatted string contains pattern for route formatting
+     * Formatted string contains pattern for route formatting
      * @example "/companies/%s/conversation/%s/
      */
-    protected static $endpoint = '';
+    public const SERVICE_ENDPOINT = '';
 
     /**
      * @var PactClientInterface
@@ -41,11 +41,6 @@ abstract class AbstractService implements ServiceInterface
     {
         $this->client = $client;
         $this->validator = ValidationFactory::getInstance();
-    }
-
-    public function getRouteTemplate()
-    {
-        return static::$endpoint;
     }
 
     /**
