@@ -392,14 +392,72 @@ class ChannelServiceTest extends ServiceTestCase
         );
     }
 
+    /**
+     * @dataProvider dataset_send_first_message_whatsapp_with_templates_should_be_ok
+     */
+    public function test_send_first_message_whatsapp_with_template(
+        string $phone,
+        string $templateId,
+        string $templateLanguage,
+        array $templateParameters
+    ) {
+        // Send first message for whatsapp uses differend endpoint
+        $endpoint = 'companies/%s/channels/%s/conversations';
+        $this->expectedMethod = Methods::POST;
+        $this->expectedUrl = $this->service->formatEndpoint(
+            $endpoint, 
+            [$this->companyId, $this->conversationId], 
+            []
+        );
+        
+        $response = $this->service->sendWhatsAppTemplateMessage(
+            $this->companyId,
+            $this->conversationId,
+            $phone,
+            $templateId,
+            $templateLanguage,
+            $templateParameters
+        );
+
+        $this->assertSame('ok', $response->status);
+    }
+
+    public function dataset_send_first_message_whatsapp_with_templates_should_be_ok()
+    {
+        return [
+            'Common request with single parameter' => [
+                '+78005553535',
+                'welcomeTemplate',
+                'ru',
+                ['имя'],
+            ],
+            'Common request with multiple parameters' => [
+                '+78005553535',
+                'welcomeTemplate',
+                'ru',
+                ['имя', 'город'],
+            ],
+            'Common request with no template parameters' => [
+                '+78005553535',
+                'welcomeTemplate',
+                'ru',
+                [],
+            ],
+        ];
+    }
 
     /**
      * @dataProvider dataset_send_first_message_whatsapp_with_wrong_template_settings_throws_invalid_argument
      */
-    public function test_send_first_message_whatsapp_business_with_wrong_template_settings_throws_invalid_argument($template, $msg) 
-    {
+    public function test_send_first_message_whatsapp_business_with_wrong_template_settings_throws_invalid_argument(
+        string $phone,
+        string $templateId,
+        string $templateLanguage,
+        array $templateParameters,
+        string $expectedExceptionMessage
+    ) {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($msg);
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
         // Send first message for whatsapp uses differend endpoint
         $endpoint = 'companies/%s/channels/%s/conversations';
@@ -410,41 +468,39 @@ class ChannelServiceTest extends ServiceTestCase
                 []
             );
         
-        $response = $this->service->sendFirstWhatsAppMessage(
+        $response = $this->service->sendWhatsAppTemplateMessage(
             $this->companyId,
             $this->conversationId,
-            '88005553535',
-            'Hello world!',
-            $template
+            $phone,
+            $templateId,
+            $templateLanguage,
+            $templateParameters
         );
     }
 
     public function dataset_send_first_message_whatsapp_with_wrong_template_settings_throws_invalid_argument()
     {
         return [
-            'Without templateId' => [
-                ['language_code' => 'en', 'parameters' => []],
-                'Id of template must be set'
+            'Empty phone' => [
+                '',
+                'welcomeTemplate',
+                'ru',
+                ['имя'],
+                'phone must be not empty string'
             ],
-            'TemplateId non-string' => [
-                ['id' => [], 'language_code' => 'en', 'parameters' => []],
-                'Id of template must be string'
+            'Empty templateId' => [
+                '+78005553535',
+                '',
+                'ru',
+                ['имя'],
+                'templateId must be not empty string'
             ],
-            'Without language code' => [
-                ['id' => 'hewwo-lord', 'parameters' => []],
-                'Language of template must be set'
-            ],
-            'Language code non-string' => [
-                ['id' => 'hewwo-lord', 'language_code' => [], 'parameters' => []],
-                'Language of template must be string'
-            ],
-            'Without parameters' => [
-                ['id' => 'hewwo-lord', 'language_code' => 'en'],
-                'Parameters of template must be set'
-            ],
-            'Parameters non-array' => [
-                ['id' => 'hewwo-lord', 'language_code' => 'en', 'parameters' => ''],
-                'Parameters of template must be array'
+            'Empty language' => [
+                '+78005553535',
+                'welcomeTemplate',
+                '',
+                ['имя'],
+                'templateLanguage must be not empty string'
             ],
         ];
     }

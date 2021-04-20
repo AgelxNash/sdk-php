@@ -3,6 +3,7 @@
 namespace Pact\Service;
 
 use Pact\Exception\ApiCallException;
+use Pact\Http\QueryBuilder;
 use Pact\PactClientInterface;
 use Pact\Service\Validation\ValidationFactory;
 use Pact\Service\ApiObjectInterface;
@@ -33,6 +34,11 @@ abstract class AbstractService implements ServiceInterface
     protected $validator;
 
     /**
+     * @var QueryBuilder
+     */
+    protected $queryBuilder;
+
+    /**
      * Constructor
      * 
      * @param PactClientInterface
@@ -41,6 +47,7 @@ abstract class AbstractService implements ServiceInterface
     {
         $this->client = $client;
         $this->validator = ValidationFactory::getInstance();
+        $this->queryBuilder = new QueryBuilder();
     }
 
     /**
@@ -54,7 +61,7 @@ abstract class AbstractService implements ServiceInterface
     public function formatEndpoint(string $endpoint,array $params, array $query): string
     {
         $this->validateRouteParams($params);
-        $query = http_build_query($query);
+        $query = $this->queryBuilder->build($query);
         if (strlen($query)) {
             $query = '?' . $query;
         }
@@ -81,7 +88,7 @@ abstract class AbstractService implements ServiceInterface
     public function request(string $method, string $endpoint, array $endpointParams=[], $body=null, array $query=[], array $headers=[])
     {
         if (is_array($body)) {
-            $body = http_build_query($body);
+            $body = $this->queryBuilder->build($body);
         }
 
         $uri = $this->formatEndpoint($endpoint, $endpointParams, $query);
