@@ -237,7 +237,7 @@ class ChannelService extends AbstractService
 
         return $this->request(
             Methods::POST,
-            $this->getRouteTemplate() . '/%s/conversations',
+            static::SERVICE_ENDPOINT . '/%s/conversations',
             [$companyId, $channelId],
             $body
         );
