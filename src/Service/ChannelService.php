@@ -200,6 +200,50 @@ class ChannelService extends AbstractService
     }
 
     /**
+     * Send first message to whatsapp (business)
+     * @link https://pact-im.github.io/api-doc/#how-to-write-first-message-to-whatsapp-business
+     *
+     * @param int $companyId Id of the company
+     * @param int $channelId Id of the conversation
+     * @param string $phone
+     * @param string $templateId
+     * @param string $templateLanguage
+     * @param array $templateParameters
+     */
+    public function sendWhatsAppTemplateMessage(
+        int $companyId,
+        int $channelId,
+        string $phone,
+        string $templateId,
+        string $templateLanguage,
+        array $templateParameters
+    ) {
+
+        $this->validator->_(strlen($phone) === 0, 'phone must be not empty string');
+        $this->validator->_(strlen($templateId) === 0, 'templateId must be not empty string');
+        $this->validator->_(strlen($templateLanguage) === 0, 'templateLanguage must be not empty string');
+        $this->validator->_(!is_array($templateParameters), 'templateParameters must be array');
+
+        $template = [
+            'id' => $templateId,
+            'language_code' => $templateLanguage,
+            'parameters' => $templateParameters,
+        ];
+
+        $body = [
+            'phone' => $phone,
+            'template' => $template,
+        ];
+
+        return $this->request(
+            Methods::POST,
+            $this->getRouteTemplate() . '/%s/conversations',
+            [$companyId, $channelId],
+            $body
+        );
+    }
+
+    /**
      * Send first message to whatsapp
      * @link https://pact-im.github.io/api-doc/#how-to-write-first-message-to-whatsapp
      *
@@ -208,25 +252,13 @@ class ChannelService extends AbstractService
      * @param string $phone Phone number
      * @param string $message Message text
      */
-    public function sendFirstWhatsAppMessage(int $companyId, int $channelId, string $phone, string $message, array $template = null)
+    public function sendFirstWhatsAppMessage(int $companyId, int $channelId, string $phone, string $message)
     {
         $this->validator->_(strlen($phone) === 0, 'Phone must be not empty string');
-
-        if ($template !== null) {
-            $this->validator->_(!key_exists('id', $template), 'Id of template must be set');
-            $this->validator->_(!is_string($template['id']), 'Id of template must be string');
-
-            $this->validator->_(!key_exists('language_code', $template), 'Language of template must be set');
-            $this->validator->_(!is_string($template['language_code']), 'Language of template must be string');
-
-            $this->validator->_(!key_exists('parameters', $template), 'Parameters of template must be set');
-            $this->validator->_(!is_array($template['parameters']), 'Parameters of template must be array');
-        }
 
         $body = [
             'phone' => $phone,
             'message' => $message,
-            'template' => $template
         ];
 
         return $this->request(
