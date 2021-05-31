@@ -39,7 +39,7 @@ class ConversationService extends AbstractService
         $this->validator->between($per, 1, 100);
         $this->validator->sort($sort);
 
-        $query = ['from' => $from, 'per' => $per, 'sort' => $sort];
+        $query = ['from' => $from, 'per' => $per, 'sort_direction' => $sort];
 
         return $this->request(Methods::GET, static::SERVICE_ENDPOINT, [$companyId], null, $query);
     }
