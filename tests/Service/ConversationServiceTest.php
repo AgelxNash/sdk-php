@@ -31,7 +31,7 @@ class ConversationServiceTest extends ServiceTestCase
      */
     public function test_get_conversations($from, $per, $sort)
     {
-        $query = ['from' => $from, 'per' => $per, 'sort' => $sort];
+        $query = ['from' => $from, 'per' => $per, 'sort_direction' => $sort];
         $this->expectedMethod = Methods::GET;
         $this->expectedUrl = $this->formatEndpoint('', [$this->companyId], $query);
 
