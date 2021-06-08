@@ -22,7 +22,56 @@ class CompanyServiceTest extends ServiceTestCase
         $this->companyId = random_int(1, 500);
     }
 
+    public function test_get_waba_templates_returns_valid_json()
+    {
+        $this->expectedMethod = Methods::GET;
+        $this->expectedUrl = $this->formatEndpoint('/waba_templates', [$this->companyId]);
 
+        $response = $this->service->getWabaTemplates(
+            $this->companyId
+        );
+        $this->assertSame('ok', $response->status);
+    }
+
+    /**
+     * @dataProvider dataset_get_waba_templates_with_valid_sort_returns_valid_json
+     */
+    public function test_get_waba_templates_with_valid_sort_returns_valid_json($sort)
+    {
+        $this->expectedMethod = Methods::GET;
+        $query = ['sort_direction' => $sort];
+        $this->expectedUrl = $this->formatEndpoint('/waba_templates', [$this->companyId], $query);
+        $response = $this->service->getWabaTemplates(
+            $this->companyId,
+            null,
+            null,
+            $sort
+        );
+        $this->assertSame('ok', $response->status);
+    }
+
+    public function dataset_get_waba_templates_with_valid_sort_returns_valid_json()
+    {
+        return [
+            ['asc'], ['desc']
+        ];
+    }
+
+    public function test_get_waba_templates_with_invalid_sort_throws_invalid_argument()
+    {
+        $sort = 'asdf';
+        $query = ['sort_direction' => $sort];
+        $this->expectedMethod = Methods::GET;
+        $this->expectedUrl = $this->formatEndpoint('/waba_templates', [$this->companyId], $query);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Sorting parameter must be "asc" or "desc". "'. $sort .'" given');
+        $response = $this->service->getWabaTemplates(
+            $this->companyId,
+            null,
+            null,
+            $sort
+        );
+    }
 
     /**
      * @dataProvider dataset_invalid_name_length

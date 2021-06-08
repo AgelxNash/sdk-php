@@ -103,4 +103,32 @@ class CompanyService extends AbstractService
             $body
         );
     }
+    
+    /**
+     * Gets WhatsApp Business templates
+     * @link https://pact-im.github.io/api-doc/#waba-templates
+     * 
+     * @param int id of the company
+     * @param string Next page token geted from last request. 
+     * Not valid or empty token return first page
+     * @param int Number of elements per page. Min 1, max 100, default: 50
+     * @param string Change sorting direction. Available values: asc, desc. Default: asc.
+     * @return Json|null
+     */
+    public function getWabaTemplates(int $companyId, ?string $from=null, ?int $per=null, ?string $sort=null)
+    {
+        $this->validator->_(strlen($from)>255, 'From identificator length must be less or equal 255');
+        $this->validator->between($per, 1, 100);
+        $this->validator->sort($sort);
+
+        $query = ['from' => $from, 'per' => $per, 'sort_direction' => $sort];
+
+        return $this->request(
+            Methods::GET,
+            static::SERVICE_ENDPOINT . '/waba_templates',
+            [$companyId],
+            null,
+            $query
+        );
+    }
 }
