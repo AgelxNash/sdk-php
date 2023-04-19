@@ -249,7 +249,7 @@ class ChannelService extends AbstractService
         return $this->request(
             Methods::DELETE,
             $this->getRouteTemplate() . '/%s',
-            [$companyId, $channelId],
+            [$companyId, $channelId]
         );
     }
     
